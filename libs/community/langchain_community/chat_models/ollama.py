@@ -34,11 +34,15 @@ def _stream_response_to_chat_generation_chunk(
 
 
 def _chat_stream_response_to_chat_generation_chunk(
-    stream_response: str,
+    stream_response: Union[str, Dict[str, Any]],
 ) -> ChatGenerationChunk:
     """Convert a stream response to a generation chunk."""
-    parsed_response = json.loads(stream_response)
-    generation_info = parsed_response if parsed_response.get("done") is True else None
+    if isinstance(stream_response, str):
+        parsed_response = json.loads(stream_response)
+    else:
+        parsed_response = stream_response
+
+    generation_info = parsed_response if parsed_response.get("done") else None
     return ChatGenerationChunk(
         message=AIMessageChunk(
             content=parsed_response.get("message", {}).get("content", "")
